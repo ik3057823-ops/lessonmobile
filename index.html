@@ -101,7 +101,7 @@
   <!-- Main content pane -->
   <div class="viewport">
     <header class="wrap pv-header">
-      <a href="#" id="menuBtn" class="menu-btn" aria-expanded="false">
+      <a href="https://ik3057823-ops.github.io/menulesson/" id="menuBtn" class="menu-btn" aria-expanded="false" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/></svg>
         <span>Menu</span>
       </a>
@@ -226,7 +226,28 @@
     const resizer = document.getElementById('splitResizer');
 
     menuBtn?.addEventListener('click', (e)=>{
+      const isMobile = window.matchMedia('(max-width:760px)').matches;
+      if (isMobile) {
+        // Let the normal link navigate so the menu fills the screen.
+        return;
+      }
+      // Desktop/tablet: intercept and open split view.
       e.preventDefault();
+      document.body.classList.add('split-open');
+      menuBtn.setAttribute('aria-expanded','true');
+      // Attempt to load; if blocked, open new tab and close split
+      const iframe = document.getElementById('splitIframe');
+      let fallbackTimer = setTimeout(()=>{
+        try{
+          if(iframe && (!iframe.contentDocument || iframe.contentWindow.location.href === 'about:blank')){ throw new Error('blocked'); }
+        }catch(_){
+          window.open(MENU_URL, '_blank', 'noopener');
+          document.body.classList.remove('split-open');
+          menuBtn?.setAttribute('aria-expanded','false');
+        }
+      }, 1400);
+      iframe?.addEventListener('load', ()=>{ clearTimeout(fallbackTimer); }, { once:true });
+    });
       // On small screens: navigate directly to the menu URL so it truly fills the screen
       if(window.matchMedia('(max-width:760px)').matches){
         window.location.href = MENU_URL; // full-screen menu on mobile
