@@ -227,6 +227,27 @@
 
     menuBtn?.addEventListener('click', (e)=>{
       e.preventDefault();
+      // On small screens: navigate directly to the menu URL so it truly fills the screen
+      if(window.matchMedia('(max-width:760px)').matches){
+        window.location.href = MENU_URL; // full-screen menu on mobile
+        return;
+      }
+      // Desktop/tablet: open split view
+      document.body.classList.add('split-open');
+      menuBtn.setAttribute('aria-expanded','true');
+      // Attempt to load; if blocked, open new tab and close split
+      const iframe = document.getElementById('splitIframe');
+      let fallbackTimer = setTimeout(()=>{
+        try{
+          if(iframe && (!iframe.contentDocument || iframe.contentWindow.location.href === 'about:blank')){ throw new Error('blocked'); }
+        }catch(_){
+          window.open(MENU_URL, '_blank', 'noopener');
+          document.body.classList.remove('split-open');
+          menuBtn?.setAttribute('aria-expanded','false');
+        }
+      }, 1400);
+      iframe?.addEventListener('load', ()=>{ clearTimeout(fallbackTimer); }, { once:true });
+    });
       document.body.classList.add('split-open');
       menuBtn.setAttribute('aria-expanded','true');
       // On small screens, prevent background scroll
